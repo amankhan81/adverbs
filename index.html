@@ -49,6 +49,7 @@
             box-shadow: 0 0 100px rgba(0,0,0,1);
             transform-origin: center;
             flex-shrink: 0;
+            background: var(--bg-dark);
         }
 
         .slide {
@@ -141,6 +142,33 @@
             color: #334155;
         }
 
+        /* Fullscreen Button Styles */
+        .fullscreen-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2000;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .fullscreen-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
+            transform: scale(1.1);
+        }
+
         #quiz-container { display: flex; flex-direction: column; gap: 15px; }
         .quiz-option {
             background: rgba(255, 255, 255, 0.05);
@@ -229,6 +257,11 @@
 <body>
 
     <div id="presentation-root">
+        <!-- Fullscreen Button -->
+        <button class="fullscreen-btn" id="fsToggleBtn" onclick="toggleFullScreen()" title="Toggle Fullscreen">
+            <i class="fa-solid fa-expand"></i>
+        </button>
+
         <div class="progress-indicator">
             <span id="curr-num">1</span> / <span id="total-num">8</span>
         </div>
@@ -415,6 +448,24 @@
             { q: "In 'Who is on the phone now?', what word does 'now' modify?", a: ["Who", "is", "phone"], c: 1 }
         ];
 
+        function toggleFullScreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            const fsBtn = document.getElementById('fsToggleBtn');
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+                fsBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+            } else {
+                cancelFullScreen.call(doc);
+                fsBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+            }
+        }
+
         function move(dir) {
             document.getElementById(`s${currentSlide}`).classList.remove('active');
             currentSlide += dir;
@@ -521,10 +572,12 @@
         function takeScreenshot() {
             const target = document.getElementById('s8');
             const btn = document.getElementById('captureBtn');
+            const fsBtn = document.getElementById('fsToggleBtn');
             const nav = document.querySelector('.nav-controls');
             
             // Temporary hide elements for a clean screenshot
             btn.style.display = 'none';
+            fsBtn.style.display = 'none';
             nav.style.display = 'none';
 
             html2canvas(target, {
@@ -538,6 +591,7 @@
                 
                 // Restore elements
                 btn.style.display = 'flex';
+                fsBtn.style.display = 'flex';
                 nav.style.display = 'flex';
             });
         }
